@@ -9,18 +9,16 @@ import {
 } from "semantic-ui-react";
 import EventListAttendee from "./EventListAttendee";
 import { AppEvent } from "../../../app/types/events";
+import { Link } from "react-router-dom";
+import { deleteEvent } from "../eventSlice";
+import { useAppDispatch } from "../../../store/Store";
 
 type Props = {
   event: AppEvent;
-  selectEvent: (event: AppEvent) => void;
-  deleteEvent: (event: string) => void;
 };
 
-export default function EventListItem({
-  event,
-  selectEvent,
-  deleteEvent,
-}: Props) {
+export default function EventListItem({ event }: Props) {
+  const dispatch = useAppDispatch();
   return (
     <SegmentGroup>
       <Segment>
@@ -56,16 +54,17 @@ export default function EventListItem({
       <Segment clearing>
         <span>{event.description}</span>
         <Button
+          onClick={() => dispatch(deleteEvent(event.id))}
           color="red"
           floated="right"
           content="Delete"
-          onClick={() => deleteEvent(event.id)}
         />
         <Button
+          as={Link}
+          to={`/events/${event.id}`}
           color="teal"
           floated="right"
           content="View"
-          onClick={() => selectEvent(event)}
         />
       </Segment>
     </SegmentGroup>

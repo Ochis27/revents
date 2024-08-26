@@ -1,114 +1,133 @@
-import { ChangeEvent, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Form, Header, Segment } from "semantic-ui-react";
-import { AppEvent } from "../../../app/types/events";
+import { useAppDispatch, useAppSelector } from "../../../store/Store";
+import { createEvent, updateEvent } from "../eventSlice";
 import { createId } from "@paralleldrive/cuid2";
+import { Controller, FieldValues, useForm } from "react-hook-form";
+import { categoryOptions } from "./categoryOptions";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 
-type Props = {
-  setFormOpen: (value: boolean) => void;
-  addEvent: (event: AppEvent) => void;
-  selectedEvent: AppEvent | null;
-  updateEvent: (event: AppEvent) => void;
-};
-export default function EventForm({
-  setFormOpen,
-  addEvent,
-  selectedEvent,
-  updateEvent,
-}: Props) {
-  const initialValues = selectedEvent ?? {
-    title: "",
-    category: "",
-    description: "",
-    city: "",
-    venue: "",
-    date: "",
-  };
+export default function EventForm() {
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm({ mode: "onTouched" });
+  let { id } = useParams();
+  const event = useAppSelector((state) =>
+    state.events.events.find((e) => e.id === id)
+  );
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const [values, setValues] = useState(initialValues);
-
-  function onSubmit() {
+  function onSubmit(data: FieldValues) {
+    id = id ?? createId();
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    selectedEvent
-      ? updateEvent({ ...selectedEvent, ...values })
-      : addEvent({
-          ...values,
-          id: createId(),
-          hostedBy: "bob",
-          attendees: [],
-          hostPhotoURL: "",
-        });
-    setFormOpen(false);
+    event
+      ? dispatch(updateEvent({ ...event, ...data, date: data.date.toString() }))
+      : dispatch(
+          createEvent({
+            ...data,
+            id,
+            hostedBy: "bob",
+            attendees: [],
+            hostPhotoURL: "",
+            date: data.date.toString(),
+          })
+        );
+    navigate(`/events/${id}`);
   }
 
-  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    setValues({ ...values, [name]: value });
-  }
   return (
     <Segment clearing>
-      <Header content={selectedEvent ? "Update Event" : "Create Event"} />
-      <Form onSubmit={onSubmit}>
+      <Header content="Event details" sub color="teal" />
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Form.Input
+          placeholder="Event title"
+          defaultValue={event?.title || ""}
+          {...register("title", { required: true })}
+          error={errors.title && "Title is required"}
+        />
+
+        <Controller
+          name="category"
+          control={control}
+          rules={{ required: "Category is required" }}
+          defaultValue={event?.category}
+          render={({ field }) => (
+            <Form.Select
+              options={categoryOptions}
+              placeholder="Category"
+              clearable
+              {...field}
+              onChange={(_, d) =>
+                setValue("category", d.value, { shouldValidate: true })
+              }
+              error={errors.category && errors.category.message}
+            />
+          )}
+        />
+
+        <Form.TextArea
+          placeholder="Description"
+          defaultValue={event?.description || ""}
+          {...register("description", { required: "Description is required" })}
+          error={errors.description && errors.description.message}
+        />
+        <Header sub content="Location details" color="teal" />
+        <Form.Input
+          placeholder="City"
+          defaultValue={event?.city || ""}
+          {...register("city", { required: "City is required" })}
+          error={errors.city && errors.city.message}
+        />
+
+        <Form.Input
+          placeholder="Venue"
+          defaultValue={event?.venue || ""}
+          {...register("venue", { required: "Venue is required" })}
+          error={errors.venue && errors.venue.message}
+        />
+
         <Form.Field>
-          <input
-            type="text"
-            placeholder="Event title"
-            value={values.title}
-            name="title"
-            onChange={(e) => handleInputChange(e)}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            placeholder="Category"
-            value={values.category}
-            name="category"
-            onChange={(e) => handleInputChange(e)}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            placeholder="Description"
-            value={values.description}
-            name="description"
-            onChange={(e) => handleInputChange(e)}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            placeholder="City"
-            value={values.city}
-            name="city"
-            onChange={(e) => handleInputChange(e)}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            placeholder="Venue"
-            value={values.venue}
-            name="venue"
-            onChange={(e) => handleInputChange(e)}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="date"
-            placeholder="Date"
-            value={values.date}
+          <Controller
             name="date"
-            onChange={(e) => handleInputChange(e)}
+            control={control}
+            rules={{ required: "Date is required" }}
+            defaultValue={(event && new Date(event.date)) || null}
+            render={({ field }) => (
+              <DatePicker
+                selected={field.value}
+                onChange={(value) =>
+                  setValue("date", value, { shouldValidate: true })
+                }
+                showTimeSelect
+                timeCaption="'time"
+                dateFormat="MMM d yyyy h:mm aa"
+                placeholderText="Event date and time"
+              />
+            )}
           />
         </Form.Field>
 
-        <Button type="submit" floated="right" positive content="Submit" />
         <Button
+          type="submit"
+          floated="right"
+          positive
+          content="Submit"
+          disabled={!isValid}
+          loading={isSubmitting}
+        />
+        <Button
+          disabled={isSubmitting}
           type="button"
           floated="right"
           content="Cancel"
-          onClick={() => setFormOpen(false)}
+          as={Link}
+          to="/events"
         />
       </Form>
     </Segment>
