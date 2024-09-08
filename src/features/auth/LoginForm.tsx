@@ -13,7 +13,6 @@ export default function LoginForm() {
   } = useForm({
     mode: "onTouched",
   });
-
   const dispatch = useAppDispatch();
 
   function onSubmit(data: FieldValues) {
@@ -22,7 +21,7 @@ export default function LoginForm() {
   }
 
   return (
-    <ModalWrapper header="Sign intro re-vents">
+    <ModalWrapper header="Sign into re-vents">
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Form.Input
           defaultValue=""

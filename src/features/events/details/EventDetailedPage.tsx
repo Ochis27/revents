@@ -2,16 +2,31 @@ import { Grid } from "semantic-ui-react";
 import EventDetailedHeader from "./EventDetailedHeader";
 import EventDetailedInfo from "./EventDetailedInfo";
 import EventDetailedChat from "./EventDetailedChat";
-import EventDetailedSideBar from "./EventDetailedSideBar";
+import EventDetailedSidebar from "./EventDetailedSideBar";
 import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { actions } from "../eventSlice";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { useFireStore } from "../../../app/hooks/firestore/useFirestore";
 import { useAppSelector } from "../../../store/Store";
 
 export default function EventDetailedPage() {
   const { id } = useParams();
   const event = useAppSelector((state) =>
-    state.events.events.find((e) => e.id === id)
+    state.events.data.find((e) => e.id === id)
   );
+  const { status } = useAppSelector((state) => state.events);
+  const { loadDocument } = useFireStore("events");
+
+  useEffect(() => {
+    if (!id) return;
+    loadDocument(id, actions);
+  }, [id, loadDocument]);
+
+  if (status === "loading") return <LoadingComponent />;
+
   if (!event) return <h2>Event not found</h2>;
+
   return (
     <Grid>
       <Grid.Column width={10}>
@@ -20,7 +35,7 @@ export default function EventDetailedPage() {
         <EventDetailedChat />
       </Grid.Column>
       <Grid.Column width={6}>
-        <EventDetailedSideBar />
+        <EventDetailedSidebar />
       </Grid.Column>
     </Grid>
   );

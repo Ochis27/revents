@@ -13,14 +13,17 @@ export default function NavBar() {
   function seedData() {
     sampleData.forEach(async (event) => {
       const { id, ...rest } = event;
-      await setDoc(doc(db, "events", id), { ...rest });
+      await setDoc(doc(db, "events", id), {
+        ...rest,
+      });
     });
   }
+
   return (
     <Menu inverted={true} fixed="top">
       <Container>
         <MenuItem header as={NavLink} to="/">
-          <img src="/assets/logo.png" alt="logo" />
+          <img src="../../../../public/assets/logo.png" alt="logo" />
           Re-vents
         </MenuItem>
         <MenuItem name="Events" as={NavLink} to="/events" />
