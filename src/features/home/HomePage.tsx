@@ -15,7 +15,7 @@ export default function HomePage() {
         <Header as="h1" inverted>
           <Image
             size="massive"
-            src="../../public/assets/logo.png"
+            src="/logo.png"
             alt="logo"
             style={{ marginBottom: 12 }}
           />
