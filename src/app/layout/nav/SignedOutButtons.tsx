@@ -4,6 +4,7 @@ import { openModal } from "../../common/modals/modalSlice";
 
 export default function SignedOutButtons() {
   const dispatch = useAppDispatch();
+
   return (
     <MenuItem position="right">
       <Button
@@ -17,6 +18,7 @@ export default function SignedOutButtons() {
         inverted
         content="Register"
         style={{ marginLeft: "0.5em" }}
+        onClick={() => dispatch(openModal({ type: "RegisterForm" }))}
       />
     </MenuItem>
   );

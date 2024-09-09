@@ -1,21 +1,26 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown, Image, Menu } from "semantic-ui-react";
-import { useAppDispatch, useAppSelector } from "../../../store/Store";
-import { signOut } from "../../../features/auth/authSlice";
+import { useAppSelector } from "../../../store/Store";
+import { signOut } from "firebase/auth";
+import { auth } from "../../config/firebase";
 
 export default function SignedInMenu() {
   const { currentUser } = useAppSelector((state) => state.auth);
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  function handleSignedOut() {
-    dispatch(signOut());
+  async function handleSignOut() {
+    await signOut(auth);
     navigate("/");
   }
+
   return (
     <Menu.Item position="right">
-      <Image avatar spaced="right" src="assets/user.png" />
-      <Dropdown pointing="top left" text={currentUser?.email}>
+      <Image
+        avatar
+        spaced="right"
+        src={currentUser?.photoURL || "../../../../public/assets/user.png"}
+      />
+      <Dropdown pointing="top left" text={currentUser?.displayName as string}>
         <Dropdown.Menu>
           <Dropdown.Item
             as={Link}
@@ -23,13 +28,14 @@ export default function SignedInMenu() {
             text="Create event"
             icon="plus"
           />
-          <Dropdown.Item to="/createEvent" text="My Profile" icon="user" />
+          <Dropdown.Item text="My profile" icon="user" />
           <Dropdown.Item
-            onClick={handleSignedOut}
-            to="/createEvent"
-            text="Sign out"
-            icon="power"
+            as={Link}
+            to="/account"
+            text="My account"
+            icon="settings"
           />
+          <Dropdown.Item onClick={handleSignOut} text="Sign out" icon="power" />
         </Dropdown.Menu>
       </Dropdown>
     </Menu.Item>
