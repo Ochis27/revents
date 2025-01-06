@@ -1,3 +1,4 @@
+import {Link} from "react-router-dom";
 import {
   Button,
   Icon,
@@ -12,15 +13,9 @@ import EventListAttendee from "./EventListAttendee";
 
 type Props = {
   event: AppEvent;
-  selectEvent: (event: AppEvent) => void;
-  deleteEvent: (event: string) => void;
 };
 
-export default function EventListItem({
-  event,
-  selectEvent,
-  deleteEvent,
-}: Props) {
+export default function EventListItem({event}: Props) {
   return (
     <SegmentGroup>
       <Segment>
@@ -55,17 +50,13 @@ export default function EventListItem({
       </Segment>
       <Segment clearing>
         <span>{event.description}</span>
+        <Button color="red" floated="right" content="Delete" />
         <Button
-          onClick={() => selectEvent(event)}
+          as={Link}
+          to={`/events/${event.id}`}
           color="teal"
           floated="right"
           content="View"
-        />
-        <Button
-          onClick={() => deleteEvent(event.id)}
-          color="red"
-          floated="right"
-          content="Delete"
         />
       </Segment>
     </SegmentGroup>
